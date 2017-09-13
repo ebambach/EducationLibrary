@@ -1,0 +1,6 @@
+C:\repos\EducationLibrary\EducationLibrary\bin\Debug\EducationLibrary.dll
+C:\repos\EducationLibrary\EducationLibrary\bin\Debug\EducationLibrary.pdb
+C:\repos\EducationLibrary\EducationLibrary\obj\Debug\EducationLibrary.csprojResolveAssemblyReference.cache
+C:\repos\EducationLibrary\EducationLibrary\obj\Debug\EducationLibrary.csproj.CoreCompileInputs.cache
+C:\repos\EducationLibrary\EducationLibrary\obj\Debug\EducationLibrary.dll
+C:\repos\EducationLibrary\EducationLibrary\obj\Debug\EducationLibrary.pdb

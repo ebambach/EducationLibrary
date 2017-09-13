@@ -1,0 +1,9 @@
+C:\repos\EducationLibrary\TestEducationLibrary\bin\Debug\TestEducationLibrary.exe.config
+C:\repos\EducationLibrary\TestEducationLibrary\bin\Debug\TestEducationLibrary.exe
+C:\repos\EducationLibrary\TestEducationLibrary\bin\Debug\TestEducationLibrary.pdb
+C:\repos\EducationLibrary\TestEducationLibrary\bin\Debug\EducationLibrary.dll
+C:\repos\EducationLibrary\TestEducationLibrary\bin\Debug\EducationLibrary.pdb
+C:\repos\EducationLibrary\TestEducationLibrary\obj\Debug\TestEducationLibrary.csprojResolveAssemblyReference.cache
+C:\repos\EducationLibrary\TestEducationLibrary\obj\Debug\TestEducationLibrary.csproj.CoreCompileInputs.cache
+C:\repos\EducationLibrary\TestEducationLibrary\obj\Debug\TestEducationLibrary.exe
+C:\repos\EducationLibrary\TestEducationLibrary\obj\Debug\TestEducationLibrary.pdb
