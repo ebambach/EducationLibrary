@@ -8,20 +8,22 @@ using System.Threading.Tasks;
 namespace EducationLibrary {
 	//This class will not be inheriting a class, as in previous exercises, but it
 	//will inherit a List of Student objects.
-	public class StudentCollection : List<Student>{
+	public class StudentCollection : List<Student> {
 
 		//^We just called StudentCollection a List of Student objects, so we are now
 		//able to use "StudentCollection" as the return type below.
 		//Instead of "Get()," we will call this method, and the one below, "Select()," to
 		//remind us of the SQL commands used for that purpose.
+
+		//connectionStr is "where" we are connecting, when we connect to SQL
+		private static string connectionStr = @"Server=STUDENT05;Database=DotNetDatabase;Trusted_Connection=yes";
+
 		public static StudentCollection Select() {
-			//Time to connect to SQL, so connectionStr is "where" we are connecting.
-			var connectionStr = @"Server=STUDENT05;Database=DotNetDatabase;Trusted_Connection=yes";
-			//Now that we know where we need to connect, let's make that connection.
+			//Let's make that connection.
 			SqlConnection connection = new SqlConnection(connectionStr);
 			//"Open, seasame!"
 			connection.Open();
-			
+
 			//If the connection did not open, we really want to know that, as we
 			//cannot go on without an open connection.
 			if (connection.State != System.Data.ConnectionState.Open) {
@@ -55,50 +57,11 @@ namespace EducationLibrary {
 			//Let's do some "reading."  So long as there are additional records to read through,
 			//this "while" loop will continue through them.
 			while (reader.Read()) {
-				//These variables will record all of the information on the Student table in SQL (as
-				//the table currently stands, if any new fields were added, this would need to be
-				//updated).
-				var id = reader.GetInt32(reader.GetOrdinal("Id"));
-				var firstname = reader.GetString(reader.GetOrdinal("FirstName"));
-				var lastname = reader.GetString(reader.GetOrdinal("LastName"));
-				var address = reader.GetString(reader.GetOrdinal("Address"));
-				var city = reader.GetString(reader.GetOrdinal("City"));
-				var state = reader.GetString(reader.GetOrdinal("State"));
-				var zipcode = reader.GetString(reader.GetOrdinal("Zipcode"));
-				var phone = reader.GetString(reader.GetOrdinal("PhoneNumber"));
-				var email = reader.GetString(reader.GetOrdinal("Email"));
-				var birthday = reader.GetDateTime(reader.GetOrdinal("Birthday"));
-				//SQL is set up to let this be "null," so we need a default for the "majorid" variable,
-				//and then so long as the value in SQL != "null," we can update majorid with the value.
-				var majorid = 0;
-				if (!reader.GetValue(reader.GetOrdinal("MajorId")).Equals(DBNull.Value)) {
-					majorid = reader.GetInt32(reader.GetOrdinal("MajorId"));
-				}
-				var sat = reader.GetInt32(reader.GetOrdinal("SAT"));
-				var gpa = reader.GetDouble(reader.GetOrdinal("GPA"));
-
-				//Becuase the above variables are going to have new information each time the loop runs,
-				//we need to make sure that data is actually stored somewhere.  Let's make a Student,
-				//and set the variables in the Student class to our variables.
-				Student student = new Student();
-				
-				student.id = id;
-				student.firstname = firstname;
-				student.lastname = lastname;
-				student.address = address;
-				student.city = city;
-				student.state = state;
-				student.zipcode = zipcode;
-				student.birthday = birthday;
-				student.phone = phone;
-				student.email = email;
-				student.majorid = majorid;
-				student.sat = sat;
-				student.gpa = gpa;
-
-				//The Student, student, is now set up, lets Add that information to the StudentCollection,
-				//students.
-				students.Add(student);
+				//This while loop greatly cuts down on the needed code compared to the first time that we did
+				//an exercise like this.  Instead of setting up an instance of a Student, we go straight to 
+				//calling a constructor in the Student class, which sets up the information from the SQL
+				//table.  This information is then added to our StudentCollection.
+				students.Add(new Student(reader));
 			}
 			reader.Close();
 			connection.Close();
@@ -107,11 +70,42 @@ namespace EducationLibrary {
 		}
 
 		//Unlike the above "Select," here we are going to return a single Student, using the id variable,
-		//the primary key, to do so.
+		//the primary key, to do so.  
+		//This "Select" will use near identical code to the above "Select,"
+		//but we only want one Student this time, so "var sql = $"select * from Student where Id = {id}";"
+
 		//We can "get" away with using different "Select" methods because they take in different parameters,
 		//much like the constructors that we have used thus far.
 		public static Student Select(int id) {
-			return null;
+			SqlConnection connection = new SqlConnection(connectionStr);
+			connection.Open();
+
+			if (connection.State != System.Data.ConnectionState.Open) {
+				Console.WriteLine("SQL Connection did not open.");
+				return null;
+			}
+
+			Console.WriteLine("SQL connection opened successfully.");
+
+			StudentCollection students = new StudentCollection();
+
+			var sql = $"select * from Student where Id = {id}";
+
+			SqlCommand cmd = new SqlCommand(sql, connection);
+			SqlDataReader reader = cmd.ExecuteReader();
+
+			while (reader.Read()) {
+				students.Add(new Student(reader));
+			}
+			reader.Close();
+			connection.Close();
+			Console.WriteLine("SQL connection and reader closed.");
+			if (students.Count == 0) {
+				return null;
+			}
+			else {
+				return students[0];
+			}
 		}
 
 		//To help remember what the SQL commands are, instead of calling this "Add()," this method
@@ -119,15 +113,95 @@ namespace EducationLibrary {
 		//and instead of "Remove()," "Delete()."
 		//This will be used to check if the student parameter was added to the StudentCollection.
 		public static bool Insert(Student student) {
-			return false;
+			SqlConnection connection = new SqlConnection(connectionStr);
+			connection.Open();
+
+			if (connection.State != System.Data.ConnectionState.Open) {
+				Console.WriteLine("SQL Connection did not open.");
+				return false;
+			}
+
+			Console.WriteLine("SQL connection opened successfully.");
+
+			StudentCollection students = new StudentCollection();
+
+			var sql = $"INSERT into Student (FirstName, LastName, Address, City, State, Zipcode," +
+				$"PhoneNumber, Email, Birthday, MajorId, SAT, GPA)" +
+				$"VALUES" +
+				$"('{student.firstname}', '{student.lastname}', '{student.address}', '{student.city}'," +
+				$"'{student.state}', '{student.zipcode}', '{student.phonenumber}', '{student.email}'," +
+				$"'{student.birthday}', {student.majorid}, {student.sat}, {student.gpa})";
+
+			SqlCommand cmd = new SqlCommand(sql, connection);
+			var recsAffected = cmd.ExecuteNonQuery();
+			if (recsAffected == 1) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		public static bool Update(Student student) {
-			return false;
+			SqlConnection connection = new SqlConnection(connectionStr);
+			connection.Open();
+
+			if (connection.State != System.Data.ConnectionState.Open) {
+				Console.WriteLine("SQL Connection did not open.");
+				return false;
+			}
+
+			Console.WriteLine("SQL connection opened successfully.");
+
+			StudentCollection students = new StudentCollection();
+
+			var sql = $"UPDATE Student Set " +
+				$"FirstName = '{student.firstname}'," +
+				$"LastName = '{student.lastname}'," +
+				$"Address = '{student.address}'," +
+				$"City = '{student.city}'," +
+				$"State = '{student.state}'," +
+				$"Zipcode = '{student.zipcode}'," +
+				$"PhoneNumber = '{student.phonenumber}'," +
+				$"Email = '{student.email}'," +
+				$"Birthday = '{student.birthday}'," +
+				$"MajorId = {student.majorid}," +
+				$"SAT = {student.sat}," +
+				$"GPA = {student.gpa}" +
+				$" WHERE ID = {student.id}";
+
+			SqlCommand cmd = new SqlCommand(sql, connection);
+			var recsAffected = cmd.ExecuteNonQuery();
+			if (recsAffected == 1) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		//Unlike the above methods, we are trying to remove the whole Student, which we can
 		//reference by the "id."
 		public static bool Delete(int id) {
-			return false;
+			SqlConnection connection = new SqlConnection(connectionStr);
+			connection.Open();
+
+			if (connection.State != System.Data.ConnectionState.Open) {
+				Console.WriteLine("SQL Connection did not open.");
+				return false;
+			}
+
+			Console.WriteLine("SQL connection opened successfully.");
+
+			StudentCollection students = new StudentCollection();
+
+			var sql = $"Delete From Student Where Id = {id}";
+			SqlCommand cmd = new SqlCommand(sql, connection);
+			var recsAffected = cmd.ExecuteNonQuery();
+			if (recsAffected == 1) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 }
